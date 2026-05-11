@@ -504,13 +504,31 @@ async function submitForm() {
     phone:     document.getElementById('phone').value.trim(),
   });
 
-  // Use JSONP to bypass CORS redirect issue with Google Apps Script
+  try {
+    const url = APPS_SCRIPT_URL + '?' + params.toString();
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'no-cors',
+    });
+    // no-cors returns opaque response, so we use JSONP as fallback
+    throw new Error('USE_JSONP');
+  } catch(e) {
+    if (e.message !== 'USE_JSONP') {
+      errBox.textContent = '⚠️ ' + e.message;
+      errBox.style.display = 'block';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      return;
+    }
+  }
+
+  // JSONP fallback
   const callbackName = 'cb_' + Date.now();
-  const params2 = new URLSearchParams(Object.fromEntries(params));
-  params2.set('callback', callbackName);
+  params.set('callback', callbackName);
 
   const script = document.createElement('script');
-  script.src = APPS_SCRIPT_URL + '?' + params2.toString();
+  script.src = APPS_SCRIPT_URL + '?' + params.toString();
+  script.async = true;
 
   const cleanup = () => {
     delete window[callbackName];
@@ -521,7 +539,7 @@ async function submitForm() {
 
   const timeout = setTimeout(() => {
     cleanup();
-    errBox.textContent = '⚠️ 连接超时，请检查网络后重试';
+    errBox.textContent = '⚠️ 连接超时，请稍后重试';
     errBox.style.display = 'block';
   }, 15000);
 
@@ -541,11 +559,27 @@ async function submitForm() {
   script.onerror = function() {
     clearTimeout(timeout);
     cleanup();
-    errBox.textContent = '⚠️ 连接失败，请检查 Apps Script 是否正确部署';
-    errBox.style.display = 'block';
+    // Last resort: try direct fetch with cors mode
+    fetch(APPS_SCRIPT_URL + '?' + params.toString())
+      .then(r => r.text())
+      .then(text => {
+        const data = JSON.parse(text);
+        if (data.success && data.affiliateLink) {
+          affiliateLink = data.affiliateLink;
+          document.getElementById('affiliateLinkText').textContent = data.affiliateLink;
+          goTo(3);
+        } else {
+          errBox.textContent = '⚠️ ' + (data.message || '系统错误');
+          errBox.style.display = 'block';
+        }
+      })
+      .catch(() => {
+        errBox.textContent = '⚠️ 连接失败，请用手机浏览器重试';
+        errBox.style.display = 'block';
+      });
   };
 
-  document.body.appendChild(script);
+  document.head.appendChild(script);
 }
 
 function copyLink() {
