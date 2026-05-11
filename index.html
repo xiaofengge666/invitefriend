@@ -456,7 +456,7 @@ html, body {
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyI5IrsnfsOioUMWX99qBb6oaEKKz52JXC659R0wKeHjMN_Ek4UPvsAovJp4ebpF6kb0w/exec';
 
 let currentPage = 1;
 let affiliateLink = '';
@@ -496,23 +496,34 @@ async function submitForm() {
   const errBox = document.getElementById('apiError');
   errBox.style.display = 'none';
   btn.classList.add('loading'); btn.disabled = true;
-  const payload = {
-    name: document.getElementById('name').value.trim(),
-    telegram: document.getElementById('telegram').value.trim(),
+
+  const params = new URLSearchParams({
+    name:      document.getElementById('name').value.trim(),
+    telegram:  document.getElementById('telegram').value.trim(),
     betcityId: document.getElementById('betcityId').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-  };
+    phone:     document.getElementById('phone').value.trim(),
+  });
+
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method:'POST', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify(payload),
+    // Use GET + URLSearchParams to avoid CORS redirect issue with Apps Script POST
+    const res = await fetch(APPS_SCRIPT_URL + '?' + params.toString(), {
+      method: 'GET',
+      redirect: 'follow',
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(e) {
+      throw new Error('服务器返回格式错误，请检查 Apps Script 是否正确部署');
+    }
     if (data.success && data.affiliateLink) {
       affiliateLink = data.affiliateLink;
       document.getElementById('affiliateLinkText').textContent = data.affiliateLink;
       goTo(3);
-    } else { throw new Error(data.message || '系统错误，请稍后再试'); }
+    } else {
+      throw new Error(data.message || '系统错误，请稍后再试');
+    }
   } catch(e) {
     errBox.textContent = '⚠️ ' + (e.message || '连接失败，请检查网络后重试');
     errBox.style.display = 'block';
