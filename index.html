@@ -492,59 +492,44 @@ function validate() {
 
 async function submitForm() {
   if (!validate()) return;
-  const btn = document.getElementById('submitBtn');
+  const btn    = document.getElementById('submitBtn');
   const errBox = document.getElementById('apiError');
   errBox.style.display = 'none';
-  btn.classList.add('loading'); btn.disabled = true;
+  btn.classList.add('loading');
+  btn.disabled = true;
 
-  const params = new URLSearchParams({
-    name:      document.getElementById('name').value.trim(),
-    telegram:  document.getElementById('telegram').value.trim(),
-    betcityId: document.getElementById('betcityId').value.trim(),
-    phone:     document.getElementById('phone').value.trim(),
-  });
+  const name      = document.getElementById('name').value.trim();
+  const telegram  = document.getElementById('telegram').value.trim();
+  const betcityId = document.getElementById('betcityId').value.trim();
+  const phone     = document.getElementById('phone').value.trim();
 
-  try {
-    const url = APPS_SCRIPT_URL + '?' + params.toString();
-    const res = await fetch(url, {
-      method: 'GET',
-      mode: 'no-cors',
-    });
-    // no-cors returns opaque response, so we use JSONP as fallback
-    throw new Error('USE_JSONP');
-  } catch(e) {
-    if (e.message !== 'USE_JSONP') {
-      errBox.textContent = '⚠️ ' + e.message;
-      errBox.style.display = 'block';
-      btn.classList.remove('loading');
-      btn.disabled = false;
-      return;
-    }
-  }
-
-  // JSONP fallback
+  // Try JSONP first (works on all browsers, bypasses CORS completely)
   const callbackName = 'cb_' + Date.now();
-  params.set('callback', callbackName);
+  const url = APPS_SCRIPT_URL
+    + '?callback=' + callbackName
+    + '&name='      + encodeURIComponent(name)
+    + '&telegram='  + encodeURIComponent(telegram)
+    + '&betcityId=' + encodeURIComponent(betcityId)
+    + '&phone='     + encodeURIComponent(phone);
 
   const script = document.createElement('script');
-  script.src = APPS_SCRIPT_URL + '?' + params.toString();
-  script.async = true;
+  script.src = url;
 
   const cleanup = () => {
-    delete window[callbackName];
-    if (script.parentNode) script.parentNode.removeChild(script);
+    try { delete window[callbackName]; } catch(e) {}
+    try { if (script.parentNode) script.parentNode.removeChild(script); } catch(e) {}
     btn.classList.remove('loading');
     btn.disabled = false;
   };
 
-  const timeout = setTimeout(() => {
+  const timer = setTimeout(() => {
     cleanup();
     errBox.textContent = '⚠️ 连接超时，请稍后重试';
     errBox.style.display = 'block';
   }, 15000);
 
   window[callbackName] = function(data) {
-    clearTimeout(timeout);
+    clearTimeout(timer);
     cleanup();
     if (data.success && data.affiliateLink) {
       affiliateLink = data.affiliateLink;
@@ -557,30 +542,15 @@ async function submitForm() {
   };
 
   script.onerror = function() {
-    clearTimeout(timeout);
+    clearTimeout(timer);
     cleanup();
-    // Last resort: try direct fetch with cors mode
-    fetch(APPS_SCRIPT_URL + '?' + params.toString())
-      .then(r => r.text())
-      .then(text => {
-        const data = JSON.parse(text);
-        if (data.success && data.affiliateLink) {
-          affiliateLink = data.affiliateLink;
-          document.getElementById('affiliateLinkText').textContent = data.affiliateLink;
-          goTo(3);
-        } else {
-          errBox.textContent = '⚠️ ' + (data.message || '系统错误');
-          errBox.style.display = 'block';
-        }
-      })
-      .catch(() => {
-        errBox.textContent = '⚠️ 连接失败，请用手机浏览器重试';
-        errBox.style.display = 'block';
-      });
+    errBox.textContent = '⚠️ 连接失败，请稍后重试';
+    errBox.style.display = 'block';
   };
 
-  document.head.appendChild(script);
+  document.body.appendChild(script);
 }
+
 
 function copyLink() {
   if (!affiliateLink) return;
