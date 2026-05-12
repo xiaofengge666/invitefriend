@@ -280,7 +280,7 @@ html, body {
 .feat-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
 .feat-list li {
   display:flex; align-items:flex-start; gap:10px;
-  font-size:13px; line-height:1.5;
+  font-size:13px; font-weight:700; line-height:1.5;
 }
 .feat-list li .check {
   width:20px; height:20px; border-radius:50%; flex-shrink:0;
@@ -288,9 +288,9 @@ html, body {
   font-weight:700;
 }
 .feat-card.c1 .check { background:rgba(255,140,50,0.15); color:#FF7A1A; box-shadow:0 0 8px rgba(255,140,50,0.2); }
-.feat-card.c1 .feat-list li { color:#1C0A00; }
+.feat-card.c1 .feat-list li { color:#CC4E00; }
 .feat-card.c2 .check { background:rgba(50,140,200,0.15); color:#1A7AB5; box-shadow:0 0 8px rgba(50,140,200,0.2); }
-.feat-card.c2 .feat-list li { color:#1C0A00; }
+.feat-card.c2 .feat-list li { color:#0D5C8A; }
 
 /* ════════════════════════════════
    REWARD ROWS
@@ -321,6 +321,13 @@ html, body {
 .rw-from, .rw-to { flex:1; }
 .rw-from { text-align:left; }
 .rw-to   { text-align:right; }
+.rw-lbl {
+  font-size:10px; font-weight:700; letter-spacing:0.08em;
+  display:inline-block; padding:4px 12px; border-radius:100px;
+  margin-bottom:6px; color:#fff;
+}
+.rw-card.c1 .rw-lbl { background:linear-gradient(135deg,#FF8C32,#E05A00); }
+.rw-card.c2 .rw-lbl { background:linear-gradient(135deg,#3294D4,#1A6FA0); }
 
 
 .rw-amt { font-family:'Oswald',sans-serif; font-size:26px; font-weight:900; }
@@ -340,8 +347,9 @@ html, body {
 }
 
 .rw-arrow {
-  width:34px; height:34px; border-radius:50%; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; font-size:14px;
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  font-weight:700;
 }
 .rw-card.c1 .rw-arrow { background:rgba(255,140,50,0.18); color:#FF7A1A; box-shadow:0 0 10px rgba(255,140,50,0.2); }
 .rw-card.c2 .rw-arrow { background:rgba(50,140,200,0.18); color:#1A7AB5; box-shadow:0 0 10px rgba(50,140,200,0.2); }
@@ -755,7 +763,7 @@ html, body {
 
   <!-- ── HERO ── -->
   <div class="hero-wrap">
-    <video autoplay muted loop playsinline webkit-playsinline preload="auto">
+    <video autoplay muted playsinline webkit-playsinline preload="auto">
       <source src="video.mp4" type="video/mp4">
     </video>
   </div>
@@ -764,7 +772,7 @@ html, body {
   <div style="height:24px"></div>
   <div class="p1-section reveal">
     <div class="sec-eyebrow"><span>世界杯早鸟配套</span></div>
-    <h2 class="sec-heading">选择你的配套<br>好友首存即享专属福利</h2>
+    <h2 class="sec-heading">两种福利配套<br>好友任选加入</h2>
     <div class="feat-grid">
 
       <!-- RM200 -->
@@ -831,7 +839,7 @@ html, body {
   <!-- ── REWARD ── -->
   <div class="p1-section reveal">
     <div class="sec-eyebrow"><span>邀请奖励</span></div>
-    <h2 class="sec-heading">好友首存，你直接赚</h2>
+    <h2 class="sec-heading">好友加入配套 你即可获得奖励</h2>
     <div class="reward-grid">
 
       <div class="rw-card c1">
@@ -844,7 +852,6 @@ html, body {
           <div class="rw-lbl">你得奖励</div>
           <div class="rw-amt">RM 20</div>
         </div>
-        <div class="rw-earn">赚 RM20</div>
       </div>
 
       <div class="rw-card c2">
@@ -857,7 +864,6 @@ html, body {
           <div class="rw-lbl">你得奖励</div>
           <div class="rw-amt">RM 100</div>
         </div>
-        <div class="rw-earn">赚 RM100</div>
       </div>
 
     </div>
@@ -866,7 +872,7 @@ html, body {
   <!-- ── HOW IT WORKS ── -->
   <div class="p1-section reveal">
     <div class="sec-eyebrow"><span>操作流程</span></div>
-    <h2 class="sec-heading">简单 3 步，轻松赚奖励</h2>
+    <h2 class="sec-heading">如何参与活动</h2>
     <div class="steps-grid">
       <div class="hw-step">
         <div class="hw-num">1</div>
